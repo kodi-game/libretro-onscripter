@@ -66,6 +66,7 @@ AudioBootStrap DUMMYAUD_bootstrap = {
 
 static void DUMMYAUD_WaitAudio(_THIS)
 {
+  SDL_Delay(10);
 }
 
 static void DUMMYAUD_PlayAudio(_THIS)

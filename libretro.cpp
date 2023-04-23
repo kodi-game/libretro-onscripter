@@ -4,7 +4,6 @@
 #include <libco.h>
 #include <onscripter/ONScripter.h>
 
-retro_usec_t SDL_libretro_now = 0;
 retro_audio_sample_batch_t SDL_libretro_audio_batch_cb;
 retro_input_state_t SDL_libretro_input_state_cb;
 
@@ -43,23 +42,12 @@ unsigned retro_api_version(void)
   return RETRO_API_VERSION;
 }
 
-static void on_frame_time(retro_usec_t usec)
-{
-  SDL_libretro_now += usec;
-}
-
 void retro_set_environment(retro_environment_t cb)
 {
   static struct retro_log_callback log;
   environ_cb = cb;
   if (environ_cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &log))
     log_cb = log.log;
-
-  static struct retro_frame_time_callback frame_time = {
-    .callback = on_frame_time,
-    .reference = 1000000 / 60,
-  };
-  environ_cb(RETRO_ENVIRONMENT_SET_FRAME_TIME_CALLBACK, &frame_time);
 }
 
 void retro_set_video_refresh(retro_video_refresh_t cb)

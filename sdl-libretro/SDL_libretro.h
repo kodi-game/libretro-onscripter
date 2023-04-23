@@ -9,7 +9,6 @@ extern "C" {
 
 void SDL_libretro_co_yield(void);
 
-extern retro_usec_t SDL_libretro_now;
 extern retro_audio_sample_batch_t SDL_libretro_audio_batch_cb;
 extern retro_input_state_t SDL_libretro_input_state_cb;
 

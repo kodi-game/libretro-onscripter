@@ -77,7 +77,7 @@ void retro_set_input_state(retro_input_state_t cb)
 void retro_get_system_info(struct retro_system_info *info)
 {
   info->need_fullpath = true;
-  info->valid_extensions = "txt|dat|___";
+  info->valid_extensions = "txt|dat|___|ons";
   info->library_version = "0.1";
   info->library_name = "onscripter";
   info->block_extract = false;

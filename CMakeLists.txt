@@ -263,6 +263,9 @@ if (LIBRETRO_STATIC)
   add_library(onscripter_libretro STATIC ${SOURCES})
 else ()
   add_library(onscripter_libretro SHARED ${SOURCES})
+  target_link_options(onscripter_libretro PRIVATE
+    -Wl,--version-script=${CMAKE_SOURCE_DIR}/link.T
+  )
 endif ()
 
 target_compile_definitions(onscripter_libretro PRIVATE

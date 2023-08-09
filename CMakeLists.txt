@@ -107,9 +107,6 @@ set(SOURCES
   deps/libpng/pngwrite.c
   deps/libpng/pngwtran.c
   deps/libpng/pngwutil.c
-  deps/libpng/arm/arm_init.c
-  deps/libpng/arm/filter_neon_intrinsics.c
-  deps/libpng/arm/palette_neon_intrinsics.c
   deps/libogg/src/bitwise.c
   deps/libogg/src/framing.c
   deps/libvorbis/lib/mdct.c

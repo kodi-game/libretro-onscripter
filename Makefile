@@ -108,6 +108,18 @@ else ifeq ($(platform), vita)
    AR = arm-vita-eabi-ar
    CXXFLAGS += -Wl,-q -Wall -O3
 	STATIC_LINKING = 1
+else ifeq ($(platform), miyoomini)
+   TARGET := $(TARGET_NAME)_libretro.so
+   fpic := -fPIC
+   SHARED := -shared -Wl,--version-script=$(CORE_DIR)/link.T -Wl,--no-undefined
+   CC = arm-linux-gnueabihf-gcc
+   CXX = arm-linux-gnueabihf-g++
+   AR = arm-linux-gnueabihf-ar
+   CFLAGS += -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve
+   CXXFLAGS += $(CFLAGS)
+   SOURCES_C += $(addprefix $(DEPS_DIR)/libpng/arm/,\
+      palette_neon_intrinsics.c arm_init.c filter_neon_intrinsics.c \
+   )
 else
    CC = gcc
    TARGET := $(TARGET_NAME)_libretro.dll

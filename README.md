@@ -15,7 +15,7 @@ This project is based on:
 - libjpeg-turbo: https://libjpeg-turbo.org/
 - libpng: http://www.libpng.org/
 - SDL, SDL_image, SDL_mixer, SDL_ttf: https://libsdl.org/
-- ONScripter: http://onscripter.osdn.jp/onscripter.html
+- ONScripter: https://github.com/ogapee/onscripter
 - sdl-libretro: https://github.com/libretro/sdl-libretro
 - libretro-common: https://github.com/libretro/libretro-common
 

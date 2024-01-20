@@ -120,13 +120,17 @@ static SDL_Surface *IMG_LoadSTB_RW(SDL_RWops *src)
 #endif
         break;
     }
-    SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, depth, Rmask, Gmask, Bmask, Amask);
+    SDL_Surface *surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, 0, depth, Rmask, Gmask, Bmask, Amask);
     if (surface == NULL) {
+        stbi_image_free(pixels);
         IMG_SetError(SDL_GetError());
         return NULL;
     }
-    SDL_free(surface->pixels);
+    surface->w = width;
+    surface->h = height;
     surface->pixels = pixels;
+    surface->pitch = width * channels;
+    SDL_SetClipRect(surface, NULL);
     return surface;
 }
 

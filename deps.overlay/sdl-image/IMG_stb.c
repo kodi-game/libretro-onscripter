@@ -145,7 +145,24 @@ void IMG_QuitPNG()
 
 int IMG_isPNG(SDL_RWops *src)
 {
-    return 1;
+    int start;
+    int is_PNG;
+    Uint8 magic[4];
+
+    if ( !src )
+        return 0;
+    start = SDL_RWtell(src);
+    is_PNG = 0;
+    if ( SDL_RWread(src, magic, 1, sizeof(magic)) == sizeof(magic) ) {
+        if ( magic[0] == 0x89 &&
+             magic[1] == 'P' &&
+             magic[2] == 'N' &&
+             magic[3] == 'G' ) {
+            is_PNG = 1;
+        }
+    }
+    SDL_RWseek(src, start, RW_SEEK_SET);
+    return(is_PNG);
 }
 
 SDL_Surface *IMG_LoadPNG_RW(SDL_RWops *src)

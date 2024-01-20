@@ -12,8 +12,7 @@ This project is based on:
 - libogg: https://xiph.org/ogg/
 - libvorbis: https://xiph.org/vorbis/
 - mad: https://www.underbit.com/products/mad/
-- libjpeg-turbo: https://libjpeg-turbo.org/
-- libpng: http://www.libpng.org/
+- stb_image: http://nothings.org/stb
 - SDL, SDL_image, SDL_mixer, SDL_ttf: https://libsdl.org/
 - ONScripter: https://github.com/ogapee/onscripter
 - sdl-libretro: https://github.com/libretro/sdl-libretro

@@ -117,9 +117,6 @@ else ifeq ($(platform), miyoomini)
    AR = arm-linux-gnueabihf-ar
    CFLAGS += -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve
    CXXFLAGS += $(CFLAGS)
-   SOURCES_C += $(addprefix $(DEPS_DIR)/libpng/arm/,\
-      palette_neon_intrinsics.c arm_init.c filter_neon_intrinsics.c \
-   )
 else
    CC = gcc
    TARGET := $(TARGET_NAME)_libretro.dll
@@ -132,7 +129,7 @@ ifeq ($(DEBUG), 1)
    CFLAGS += -O0 -g -DDEBUG
    CXXFLAGS += -O0 -g -DDEBUG
 else
-   CFLAGS += -O3 
+   CFLAGS += -O3
    CXXFLAGS += -O3
 endif
 

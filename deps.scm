@@ -51,8 +51,6 @@
           ("libogg" #$(package-source libogg))
           ("libvorbis" #$(package-source libvorbis))
           ("libmad" #$ (package-source libmad))
-          ("libjpeg-turbo" #$(package-source libjpeg-turbo))
-          ("libpng" #$(package-source libpng))
           ("zlib" #$(package-source zlib))
           ("sdl" #$(package-source sdl))
           ("sdl-image" #$(package-source sdl-image))

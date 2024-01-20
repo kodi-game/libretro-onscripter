@@ -25,58 +25,6 @@ set(SOURCES
   deps/freetype/src/truetype/truetype.c
   deps/freetype/src/raster/raster.c
   deps/freetype/src/smooth/smooth.c
-  deps/libjpeg-turbo/jcapimin.c
-  deps/libjpeg-turbo/jcapistd.c
-  deps/libjpeg-turbo/jccoefct.c
-  deps/libjpeg-turbo/jccolor.c
-  deps/libjpeg-turbo/jcdctmgr.c
-  deps/libjpeg-turbo/jchuff.c
-  deps/libjpeg-turbo/jcicc.c
-  deps/libjpeg-turbo/jcinit.c
-  deps/libjpeg-turbo/jcmainct.c
-  deps/libjpeg-turbo/jcmarker.c
-  deps/libjpeg-turbo/jcmaster.c
-  deps/libjpeg-turbo/jcomapi.c
-  deps/libjpeg-turbo/jcparam.c
-  deps/libjpeg-turbo/jcphuff.c
-  deps/libjpeg-turbo/jcprepct.c
-  deps/libjpeg-turbo/jcsample.c
-  deps/libjpeg-turbo/jctrans.c
-  deps/libjpeg-turbo/jdapimin.c
-  deps/libjpeg-turbo/jdapistd.c
-  deps/libjpeg-turbo/jdatadst.c
-  deps/libjpeg-turbo/jdatasrc.c
-  deps/libjpeg-turbo/jdcoefct.c
-  deps/libjpeg-turbo/jdcolor.c
-  deps/libjpeg-turbo/jddctmgr.c
-  deps/libjpeg-turbo/jdhuff.c
-  deps/libjpeg-turbo/jdicc.c
-  deps/libjpeg-turbo/jdinput.c
-  deps/libjpeg-turbo/jdmainct.c
-  deps/libjpeg-turbo/jdmarker.c
-  deps/libjpeg-turbo/jdmaster.c
-  deps/libjpeg-turbo/jdmerge.c
-  deps/libjpeg-turbo/jdphuff.c
-  deps/libjpeg-turbo/jdpostct.c
-  deps/libjpeg-turbo/jdsample.c
-  deps/libjpeg-turbo/jdtrans.c
-  deps/libjpeg-turbo/jerror.c
-  deps/libjpeg-turbo/jfdctflt.c
-  deps/libjpeg-turbo/jfdctfst.c
-  deps/libjpeg-turbo/jfdctint.c
-  deps/libjpeg-turbo/jidctflt.c
-  deps/libjpeg-turbo/jidctfst.c
-  deps/libjpeg-turbo/jidctint.c
-  deps/libjpeg-turbo/jidctred.c
-  deps/libjpeg-turbo/jquant1.c
-  deps/libjpeg-turbo/jquant2.c
-  deps/libjpeg-turbo/jutils.c
-  deps/libjpeg-turbo/jmemmgr.c
-  deps/libjpeg-turbo/jmemnobs.c
-  deps/libjpeg-turbo/jaricom.c
-  deps/libjpeg-turbo/jcarith.c
-  deps/libjpeg-turbo/jdarith.c
-  deps/libjpeg-turbo/jsimd_none.c
   deps/zlib/adler32.c
   deps/zlib/compress.c
   deps/zlib/crc32.c
@@ -92,21 +40,6 @@ set(SOURCES
   deps/zlib/trees.c
   deps/zlib/uncompr.c
   deps/zlib/zutil.c
-  deps/libpng/png.c
-  deps/libpng/pngerror.c
-  deps/libpng/pngget.c
-  deps/libpng/pngmem.c
-  deps/libpng/pngpread.c
-  deps/libpng/pngread.c
-  deps/libpng/pngrio.c
-  deps/libpng/pngrtran.c
-  deps/libpng/pngrutil.c
-  deps/libpng/pngset.c
-  deps/libpng/pngtrans.c
-  deps/libpng/pngwio.c
-  deps/libpng/pngwrite.c
-  deps/libpng/pngwtran.c
-  deps/libpng/pngwutil.c
   deps/libogg/src/bitwise.c
   deps/libogg/src/framing.c
   deps/libvorbis/lib/mdct.c
@@ -198,11 +131,10 @@ set(SOURCES
   sdl-libretro/video.c
   deps/sdl-image/IMG_bmp.c
   deps/sdl-image/IMG.c
+  deps/sdl-image/IMG_stb.c
   deps/sdl-image/IMG_gif.c
-  deps/sdl-image/IMG_jpg.c
   deps/sdl-image/IMG_lbm.c
   deps/sdl-image/IMG_pcx.c
-  deps/sdl-image/IMG_png.c
   deps/sdl-image/IMG_pnm.c
   deps/sdl-image/IMG_tga.c
   deps/sdl-image/IMG_tif.c
@@ -276,10 +208,8 @@ target_include_directories(onscripter_libretro PRIVATE
   deps
   deps/bzip2
   deps/freetype/include
-  deps/libjpeg-turbo
   deps/libmad
   deps/libogg/include
-  deps/libpng
   deps/libretro-common/include
   deps/libvorbis/include
   deps/sdl-image

@@ -12,34 +12,6 @@ set(SOURCES
   deps/bzip2/compress.c
   deps/bzip2/decompress.c
   deps/bzip2/bzlib.c
-  deps/freetype/src/base/ftbase.c
-  deps/freetype/src/base/ftdebug.c
-  deps/freetype/src/base/ftinit.c
-  deps/freetype/src/base/ftsystem.c
-  deps/freetype/src/base/ftbitmap.c
-  deps/freetype/src/base/ftglyph.c
-  deps/freetype/src/base/ftstroke.c
-  deps/freetype/src/autofit/autofit.c
-  deps/freetype/src/psnames/psnames.c
-  deps/freetype/src/sfnt/sfnt.c
-  deps/freetype/src/truetype/truetype.c
-  deps/freetype/src/raster/raster.c
-  deps/freetype/src/smooth/smooth.c
-  deps/zlib/adler32.c
-  deps/zlib/compress.c
-  deps/zlib/crc32.c
-  deps/zlib/deflate.c
-  deps/zlib/gzclose.c
-  deps/zlib/gzlib.c
-  deps/zlib/gzread.c
-  deps/zlib/gzwrite.c
-  deps/zlib/inflate.c
-  deps/zlib/infback.c
-  deps/zlib/inftrees.c
-  deps/zlib/inffast.c
-  deps/zlib/trees.c
-  deps/zlib/uncompr.c
-  deps/zlib/zutil.c
   deps/libogg/src/bitwise.c
   deps/libogg/src/framing.c
   deps/libvorbis/lib/mdct.c
@@ -129,9 +101,10 @@ set(SOURCES
   sdl-libretro/audio.c
   sdl-libretro/events.c
   sdl-libretro/video.c
+  sdl-libretro/SDL_ttf.c
+  sdl-libretro/IMG_stb.c
   deps/sdl-image/IMG_bmp.c
   deps/sdl-image/IMG.c
-  deps/sdl-image/IMG_stb.c
   deps/sdl-image/IMG_gif.c
   deps/sdl-image/IMG_lbm.c
   deps/sdl-image/IMG_pcx.c
@@ -153,7 +126,6 @@ set(SOURCES
   deps/sdl-mixer/music_ogg.c
   deps/sdl-mixer/dynamic_ogg.c
   deps/sdl-mixer/music_mad.c
-  deps/sdl-ttf/SDL_ttf.c
   deps/libretro-common/compat/compat_strl.c
   deps/libretro-common/encodings/encoding_utf.c
   deps/libretro-common/string/stdstring.c
@@ -194,6 +166,7 @@ else ()
   add_library(onscripter_libretro SHARED ${SOURCES})
   target_link_options(onscripter_libretro PRIVATE
     -Wl,--version-script=${CMAKE_SOURCE_DIR}/link.T
+    -Wl,--no-undefined
   )
 endif ()
 
@@ -207,7 +180,6 @@ target_compile_definitions(onscripter_libretro PRIVATE
 target_include_directories(onscripter_libretro PRIVATE
   deps
   deps/bzip2
-  deps/freetype/include
   deps/libmad
   deps/libogg/include
   deps/libretro-common/include
@@ -215,8 +187,6 @@ target_include_directories(onscripter_libretro PRIVATE
   deps/sdl-image
   deps/sdl/include
   deps/sdl-mixer
-  deps/sdl-ttf
-  deps/zlib
   sdl-libretro
 )
 

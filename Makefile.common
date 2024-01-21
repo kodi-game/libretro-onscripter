@@ -6,8 +6,6 @@ SDL_LIBRETRO_DIR = $(CORE_DIR)/sdl-libretro
 INCFLAGS := \
   -I$(LIBRETRO_COMM_DIR)/include \
   -I$(DEPS_DIR)/bzip2 \
-  -I$(DEPS_DIR)/zlib \
-  -I$(DEPS_DIR)/freetype/include \
   -I$(DEPS_DIR)/libogg/include \
   -I$(DEPS_DIR)/libvorbis/include \
   -I$(DEPS_DIR)/libmad/ \
@@ -15,7 +13,6 @@ INCFLAGS := \
   -I$(DEPS_DIR)/sdl/include \
   -I$(DEPS_DIR)/sdl-image \
   -I$(DEPS_DIR)/sdl-mixer \
-  -I$(DEPS_DIR)/sdl-ttf \
   -I$(CORE_DIR) \
   -I$(DEPS_DIR)
 
@@ -33,31 +30,6 @@ SOURCES_C += \
   $(DEPS_DIR)/bzip2/compress.c \
   $(DEPS_DIR)/bzip2/decompress.c \
   $(DEPS_DIR)/bzip2/bzlib.c
-
-# freetype
-CFLAGS += -DFT2_BUILD_LIBRARY=1
-SOURCES_C += $(addprefix $(DEPS_DIR)/freetype/src/,\
-  base/ftbase.c \
-  base/ftdebug.c \
-  base/ftinit.c \
-  base/ftsystem.c \
-  base/ftbitmap.c \
-  base/ftglyph.c \
-  base/ftstroke.c \
-  autofit/autofit.c \
-  psnames/psnames.c \
-  sfnt/sfnt.c \
-  truetype/truetype.c \
-  raster/raster.c \
-  smooth/smooth.c \
-)
-
-# zlib
-SOURCES_C += $(addprefix $(DEPS_DIR)/zlib/,\
-  adler32.c compress.c crc32.c deflate.c gzclose.c gzlib.c \
-  gzread.c gzwrite.c inflate.c infback.c inftrees.c inffast.c \
-  trees.c uncompr.c zutil.c \
-)
 
 # libogg
 SOURCES_C += $(addprefix $(DEPS_DIR)/libogg/src/,\
@@ -109,13 +81,14 @@ SOURCES_C += $(addprefix $(DEPS_DIR)/sdl/src/,\
 )
 SOURCES_C += $(addprefix $(SDL_LIBRETRO_DIR)/, \
   audio.c events.c video.c \
+  SDL_ttf.c IMG_stb.c \
 )
 
 # sdl-image
 CFLAGS += -DSIZEOF_SIZE_T=__SIZEOF_SIZE_T__ -DLOAD_JPG -DLOAD_BMP -DLOAD_PNG
 SOURCES_C += $(addprefix $(DEPS_DIR)/sdl-image/, \
   IMG.c IMG_bmp.c IMG_gif.c IMG_lbm.c IMG_pcx.c \
-  IMG_pnm.c IMG_stb.c IMG_tga.c IMG_tif.c IMG_webp.c \
+  IMG_pnm.c IMG_tga.c IMG_tif.c IMG_webp.c \
   IMG_xcf.c IMG_xpm.c IMG_xv.c \
 )
 
@@ -133,9 +106,6 @@ SOURCES_C += $(addprefix $(DEPS_DIR)/sdl-mixer/,\
   dynamic_ogg.c \
   music_mad.c \
 )
-
-# sdl-ttf
-SOURCES_C += $(DEPS_DIR)/sdl-ttf/SDL_ttf.c
 
 # libretro-common
 SOURCES_C += $(addprefix $(LIBRETRO_COMM_DIR)/,\

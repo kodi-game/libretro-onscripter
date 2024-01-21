@@ -7,12 +7,10 @@ novel games to be played with libretro frontends such as RetroArch.
 
 This project is based on:
 - bzip2: https://sourceware.org/bzip2/
-- zlib: https://zlib.net/
-- FreeType: https://www.freetype.org/
 - libogg: https://xiph.org/ogg/
 - libvorbis: https://xiph.org/vorbis/
 - mad: https://www.underbit.com/products/mad/
-- stb_image: http://nothings.org/stb
+- stb_image, stb_truetype: https://github.com/nothings/stb
 - SDL, SDL_image, SDL_mixer, SDL_ttf: https://libsdl.org/
 - ONScripter: https://github.com/ogapee/onscripter
 - sdl-libretro: https://github.com/libretro/sdl-libretro

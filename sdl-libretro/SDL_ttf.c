@@ -23,6 +23,9 @@
 #include "SDL_ttf.h"
 #define STB_TRUETYPE_IMPLEMENTATION
 #define STBTT_STATIC
+#define STBTT_STREAM_TYPE SDL_RWops *
+#define STBTT_STREAM_READ(s,x,y)  s->read(s, x, 1, y)
+#define STBTT_STREAM_SEEK(s,x)    s->seek(s, x, RW_SEEK_SET);
 #include "stb_truetype.h"
 
 #define NUM_GRAYS       256
@@ -31,6 +34,10 @@ struct _TTF_Font {
     stbtt_fontinfo info;
     float scale;
     int ascent, descent, height, lineskip;
+
+    /* We are responsible for closing the font stream */
+    SDL_RWops *src;
+    int freesrc;
 };
 
 const SDL_version *TTF_Linked_Version(void)
@@ -48,22 +55,16 @@ int TTF_Init(void)
 TTF_Font* TTF_OpenFontIndexDPIRW(SDL_RWops *src, int freesrc, int ptsize, long index, unsigned int hdpi, unsigned int vdpi)
 {
     TTF_Font *font;
-    void *ttf_buffer;
-    size_t ttf_size;
 
     if (!src) {
         TTF_SetError("Passed a NULL font source");
         return NULL;
     }
 
-    SDL_RWseek(src, 0, RW_SEEK_END);
-    ttf_size = SDL_RWtell(src);
-    SDL_RWseek(src, 0, RW_SEEK_SET);
-
-    if (ttf_size <= 0) {
+    if (SDL_RWtell(src) < 0) {
         TTF_SetError("Can't seek in stream");
         if (freesrc)
-            SDL_RWclose( src );
+            SDL_RWclose(src);
         return NULL;
     }
 
@@ -76,29 +77,10 @@ TTF_Font* TTF_OpenFontIndexDPIRW(SDL_RWops *src, int freesrc, int ptsize, long i
     }
     memset(font, 0, sizeof(*font));
 
-    ttf_buffer = malloc(ttf_size);
-    if (ttf_buffer == NULL) {
-        TTF_SetError("Out of memory");
-        if (freesrc)
-            SDL_RWclose( src );
-        free(font);
-        return NULL;
-    }
-
-    if (SDL_RWread(src, ttf_buffer, ttf_size, 1) == 0) {
-        TTF_SetError(SDL_GetError());
-        if (freesrc) {
-            SDL_RWclose(src);
-        }
-        free(ttf_buffer);
-        free(font);
-        return NULL;
-    }
-    if (freesrc)
-        SDL_RWclose(src);
-
-    stbtt_InitFont(&font->info, ttf_buffer, stbtt_GetFontOffsetForIndex(ttf_buffer, index));
+    stbtt_InitFont(&font->info, src, stbtt_GetFontOffsetForIndex(src, index));
     stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->lineskip);
+    font->src = src;
+    font->freesrc = freesrc;
     font->height = ptsize * 96 / 72;
     font->scale = stbtt_ScaleForPixelHeight(&font->info, font->height);
     font->lineskip = (font->ascent - font->descent + font->lineskip) * font->scale + 1;
@@ -151,7 +133,8 @@ TTF_Font* TTF_OpenFont(const char *file, int ptsize)
 void TTF_CloseFont(TTF_Font* font)
 {
     if (font) {
-        free(font->info.data);
+        if (font->freesrc)
+            SDL_RWclose(font->src);
         free(font);
     }
 }

@@ -10,7 +10,7 @@ This project is based on:
 - libogg: https://xiph.org/ogg/
 - libvorbis: https://xiph.org/vorbis/
 - mad: https://www.underbit.com/products/mad/
-- stb_image, stb_truetype: https://github.com/nothings/stb
+- stb_image, stb_truetype: https://github.com/nothings/stb, https://github.com/codewitch-honey-crisis/stb
 - SDL, SDL_image, SDL_mixer, SDL_ttf: https://libsdl.org/
 - ONScripter: https://github.com/ogapee/onscripter
 - sdl-libretro: https://github.com/libretro/sdl-libretro

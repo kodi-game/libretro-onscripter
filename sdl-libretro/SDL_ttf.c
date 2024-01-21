@@ -211,8 +211,7 @@ SDL_Surface* TTF_RenderGlyph_Shaded(TTF_Font* font,
     SDL_Surface *surface;
     SDL_Palette *palette;
     int rdiff, gdiff, bdiff;
-    int width, height, xoff, yoff;
-    void *pixels;
+    int width = 0, height = 0;
 
     int glyph = stbtt_FindGlyphIndex(&font->info, ch);
     if (glyph == 0) {

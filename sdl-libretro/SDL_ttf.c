@@ -33,7 +33,7 @@
 struct _TTF_Font {
     stbtt_fontinfo info;
     float scale;
-    int ascent, descent, height, lineskip;
+    int ascent, descent, height;
 
     /* We are responsible for closing the font stream */
     SDL_RWops *src;
@@ -78,14 +78,14 @@ TTF_Font* TTF_OpenFontIndexDPIRW(SDL_RWops *src, int freesrc, int ptsize, long i
     memset(font, 0, sizeof(*font));
 
     stbtt_InitFont(&font->info, src, stbtt_GetFontOffsetForIndex(src, index));
-    stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, &font->lineskip);
+    stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, NULL);
     font->src = src;
     font->freesrc = freesrc;
-    font->height = ptsize * 96 / 72;
+    font->height = STBTT_ifloor(ptsize * 96.0 / 72.0);
     font->scale = stbtt_ScaleForPixelHeight(&font->info, font->height);
-    font->lineskip = (font->ascent - font->descent + font->lineskip) * font->scale + 1;
-    font->ascent *= font->scale;
-    font->descent *= font->scale;
+    font->ascent = STBTT_iceil(font->ascent * font->scale);
+    font->descent = STBTT_iceil(font->descent * font->scale);
+
     return font;
 }
 
@@ -156,7 +156,7 @@ int TTF_FontDescent(const TTF_Font *font)
 
 int TTF_FontLineSkip(const TTF_Font *font)
 {
-    return font->lineskip;
+    return font->height;
 }
 
 int TTF_GlyphMetrics(TTF_Font *font, Uint16 ch,
@@ -173,15 +173,15 @@ int TTF_GlyphMetrics(TTF_Font *font, Uint16 ch,
     stbtt_GetGlyphBox(&font->info, glyph, &x0, &y0, &x1, &y1);
     stbtt_GetGlyphHMetrics(&font->info, glyph, &advance_width, 0);
     if (minx)
-        *minx = x0 * font->scale;
+        *minx = STBTT_ifloor(x0 * font->scale);
     if (miny)
-        *miny = y0 * font->scale;
+        *miny = STBTT_ifloor(y0 * font->scale);
     if (maxx)
-        *maxx = x1 * font->scale;
+        *maxx = STBTT_iceil(x1 * font->scale);
     if (maxy)
-        *maxy = y1 * font->scale;
+        *maxy = STBTT_iceil(y1 * font->scale);
     if (advance)
-        *advance = advance_width * font->scale;
+        *advance = STBTT_iceil(advance_width * font->scale);
     return 0;
 }
 

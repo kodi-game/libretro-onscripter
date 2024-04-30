@@ -132,6 +132,7 @@ set(SOURCES
   deps/libretro-common/time/rtime.c
   deps/libretro-common/file/file_path.c
   deps/libretro-common/libco/libco.c
+  deps/llco/llco.c
   deps/onscripter/ONScripter.cpp
   deps/onscripter/ONScripter_animation.cpp
   deps/onscripter/ONScripter_command.cpp
@@ -184,6 +185,7 @@ target_include_directories(onscripter_libretro PRIVATE
   deps/libogg/include
   deps/libretro-common/include
   deps/libvorbis/include
+  deps/llco
   deps/sdl-image
   deps/sdl/include
   deps/sdl-mixer

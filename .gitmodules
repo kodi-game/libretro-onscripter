@@ -4,3 +4,6 @@
 [submodule "deps/libretro-common"]
 	path = deps/libretro-common
 	url = https://github.com/libretro/libretro-common.git
+[submodule "deps/llco"]
+	path = deps/llco
+	url = https://github.com/tidwall/llco.git

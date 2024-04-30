@@ -1,8 +1,10 @@
 #include <SDL_libretro.h>
 #include <retro_miscellaneous.h>
 #include <file/file_path.h>
-#include <libco.h>
 #include <onscripter/ONScripter.h>
+extern "C" {
+#include <llco.h>
+}
 
 retro_audio_sample_batch_t SDL_libretro_audio_batch_cb;
 retro_input_state_t SDL_libretro_input_state_cb;
@@ -14,12 +16,13 @@ static retro_input_poll_t input_poll_cb;
 static retro_log_printf_t log_cb = fallback_log;
 static retro_environment_t environ_cb;
 static ONScripter ons;
-static cothread_t retro_ct, ons_ct;
+static struct llco *retro_co;
+static struct llco *ons_co;
 
 
 void SDL_libretro_co_yield(void)
 {
-  co_switch(retro_ct);
+  llco_switch(retro_co, false);
 }
 
 void SDL_libretro_video_refresh()
@@ -95,22 +98,38 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
   info->timing.sample_rate = 44100.0;
 }
 
-static void ons_main(void)
+static void ons_main(void *udata)
 {
+  ons_co = llco_current();
+  llco_switch(retro_co, false);
   if (ons.init()) {
     log_cb(RETRO_LOG_ERROR, "Failed to initialize ONScripter\n");
     return;
   }
   SDL_ShowCursor(SDL_DISABLE);
   ons.executeLabel();
+  llco_switch(retro_co, true);
+}
+
+static void ons_cleanup(void *stack, size_t stack_size, void *udata)
+{
+  free(stack);
 }
 
 void retro_init(void)
 {
+  const size_t ons_stacksz = 65536*8;
   enum retro_pixel_format pixfmt = RETRO_PIXEL_FORMAT_XRGB8888;
   environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixfmt);
-  retro_ct = co_active();
-  ons_ct = co_create(65536*8, ons_main);
+  retro_co = llco_current();
+
+  struct llco_desc desc = {
+    .stack = malloc(ons_stacksz),
+    .stack_size = ons_stacksz,
+    .entry = ons_main,
+    .cleanup = ons_cleanup,
+  };
+  llco_start(&desc, false);
 }
 
 bool retro_load_game(const struct retro_game_info *game)
@@ -143,7 +162,7 @@ void retro_reset(void)
 
 void retro_run(void)
 {
-  co_switch(ons_ct);
+  llco_switch(ons_co, false);
   input_poll_cb();
   SDL_libretro_video_refresh();
 }

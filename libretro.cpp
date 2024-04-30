@@ -8,6 +8,7 @@ extern "C" {
 
 retro_audio_sample_batch_t SDL_libretro_audio_batch_cb;
 retro_input_state_t SDL_libretro_input_state_cb;
+SDL_AudioSpec *SDL_libretro_audio_spec = NULL;
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...);
 static retro_video_refresh_t video_cb;
@@ -165,6 +166,17 @@ void retro_run(void)
   llco_switch(ons_co, false);
   input_poll_cb();
   SDL_libretro_video_refresh();
+
+  // XXX: convert audio format?
+  SDL_AudioSpec *spec = SDL_libretro_audio_spec;
+  static const size_t frames = 44100 / 60;
+  static const size_t len = frames * 4;
+  static int16_t stream[frames * 2];
+  if (spec && SDL_GetAudioStatus() == SDL_AUDIO_PLAYING) {
+    memset(stream, 0, len);
+    spec->callback(NULL, (uint8_t *)stream, len);
+    SDL_libretro_audio_batch_cb(stream, frames);
+  }
 }
 
 size_t retro_serialize_size(void)

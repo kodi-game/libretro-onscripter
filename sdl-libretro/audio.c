@@ -66,7 +66,6 @@ AudioBootStrap DUMMYAUD_bootstrap = {
 
 static void DUMMYAUD_WaitAudio(_THIS)
 {
-  SDL_Delay(10);
 }
 
 static void DUMMYAUD_PlayAudio(_THIS)
@@ -101,6 +100,8 @@ static int DUMMYAUD_OpenAudio(_THIS, SDL_AudioSpec *spec)
   }
   SDL_memset(this->hidden->mixbuf, spec->silence, spec->size);
 
-  /* We're ready to rock and roll. :-) */
-  return 0;
+  SDL_libretro_audio_spec = spec;
+
+  /* Don't spawn thread for SDL_RunAudio */
+  return 1;
 }

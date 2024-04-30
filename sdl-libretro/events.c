@@ -100,13 +100,9 @@ static void PumpMouseEvents(void)
 
 void DUMMY_PumpEvents(_THIS)
 {
-  static Uint32 t = 0;
-  if (SDL_GetTicks() - t < 10)
-      return;
-  t = SDL_GetTicks();
-  SDL_libretro_co_yield();
   PumpKeyboardEvents();
   PumpMouseEvents();
+  SDL_libretro_co_yield();
 }
 
 void DUMMY_InitOSKeymap(_THIS)

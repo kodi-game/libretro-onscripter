@@ -51,7 +51,10 @@ Convert script in DIRECTORY to UTF-8 encoded 'pscript.dat'.
           (for-each
            (lambda (f)
              (call-with-input-file f
-               (lambda (p) (display (get-string-all p))) #:encoding encoding))
+               (lambda (p)
+                 (display (get-string-all p))
+                 (newline))
+               #:encoding encoding))
            (scandir
             gamedir (lambda (f) (string-match "^[0-9]+[.]txt$" f)) f<?)))))
      ((f? "pscript.dat")

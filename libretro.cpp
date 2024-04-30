@@ -19,7 +19,6 @@ static retro_environment_t environ_cb;
 static ONScripter ons;
 static struct llco *retro_co;
 static struct llco *ons_co;
-static bool audio_enabled = true;
 
 
 void SDL_libretro_co_yield(void)
@@ -118,38 +117,11 @@ static void ons_cleanup(void *stack, size_t stack_size, void *udata)
   free(stack);
 }
 
-static void audio_cb(void)
-{
-  // XXX: convert audio format?
-  static const size_t frames = 256;
-  static const size_t len = frames * 4;
-  static int16_t stream[frames * 2];
-
-  SDL_AudioSpec *spec = SDL_libretro_audio_spec;
-  if (spec && SDL_GetAudioStatus() == SDL_AUDIO_PLAYING && audio_enabled) {
-    memset(stream, 0, len);
-    spec->callback(NULL, (uint8_t *)stream, len);
-    SDL_libretro_audio_batch_cb(stream, frames);
-  }
-}
-
-static void audio_set_state_cb(bool enabled)
-{
-  audio_enabled = enabled;
-}
-
 void retro_init(void)
 {
   const size_t ons_stacksz = 65536*8;
   enum retro_pixel_format pixfmt = RETRO_PIXEL_FORMAT_XRGB8888;
-  struct retro_audio_callback audio = {
-    .callback = audio_cb,
-    .set_state = audio_set_state_cb,
-  };
   environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixfmt);
-  if (!environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_CALLBACK, &audio)) {
-    log_cb(RETRO_LOG_ERROR, "SET_AUDIO_CALLBACK failed, no audio...\n");
-  }
   retro_co = llco_current();
 
   struct llco_desc desc = {
@@ -195,6 +167,16 @@ void retro_run(void)
   input_poll_cb();
   SDL_libretro_video_refresh();
 
+  // XXX: convert audio format?
+  SDL_AudioSpec *spec = SDL_libretro_audio_spec;
+  static const size_t frames = 44100 / 60;
+  static const size_t len = frames * 4;
+  static int16_t stream[frames * 2];
+  if (spec && SDL_GetAudioStatus() == SDL_AUDIO_PLAYING) {
+    memset(stream, 0, len);
+    spec->callback(NULL, (uint8_t *)stream, len);
+    SDL_libretro_audio_batch_cb(stream, frames);
+  }
 }
 
 size_t retro_serialize_size(void)

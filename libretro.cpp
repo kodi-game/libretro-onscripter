@@ -169,7 +169,7 @@ void retro_run(void)
 
   // XXX: convert audio format?
   SDL_AudioSpec *spec = SDL_libretro_audio_spec;
-  static const size_t frames = 44100 / 60;
+  static const size_t frames = 1024;
   static const size_t len = frames * 4;
   static int16_t stream[frames * 2];
   if (spec && SDL_GetAudioStatus() == SDL_AUDIO_PLAYING) {

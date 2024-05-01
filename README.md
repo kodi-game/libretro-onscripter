@@ -15,7 +15,6 @@ This project is based on:
 - ONScripter: https://github.com/ogapee/onscripter
 - sdl-libretro: https://github.com/libretro/sdl-libretro
 - libretro-common: https://github.com/libretro/libretro-common
-- llco: https://github.com/tidwall/llco
 
 Thanks them!
 

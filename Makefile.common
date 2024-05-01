@@ -9,7 +9,6 @@ INCFLAGS := \
   -I$(DEPS_DIR)/libogg/include \
   -I$(DEPS_DIR)/libvorbis/include \
   -I$(DEPS_DIR)/libmad/ \
-  -I${DEPS_DIR}/llco \
   -I$(SDL_LIBRETRO_DIR) \
   -I$(DEPS_DIR)/sdl/include \
   -I$(DEPS_DIR)/sdl-image \
@@ -116,9 +115,6 @@ SOURCES_C += $(addprefix $(LIBRETRO_COMM_DIR)/,\
   time/rtime.c \
   file/file_path.c \
 )
-
-# llco
-SOURCES_C += $(DEPS_DIR)/llco/llco.c
 
 # onscripter
 SOURCES_CXX := $(CORE_DIR)/libretro.cpp

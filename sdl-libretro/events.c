@@ -2,6 +2,7 @@
 #include <sdl/src/events/SDL_events_c.h>
 #include <sdl/src/video/dummy/SDL_nullevents_c.h>
 
+static SDL_sem *sem = NULL;
 
 static void PumpKeyboardEvents(void)
 {
@@ -100,9 +101,14 @@ static void PumpMouseEvents(void)
 
 void DUMMY_PumpEvents(_THIS)
 {
+  SDL_SemWait(SDL_libretro_event_sem);
+}
+
+void SDL_libretro_PumpEvents(void)
+{
   PumpKeyboardEvents();
   PumpMouseEvents();
-  SDL_libretro_co_yield();
+  SDL_SemPost(SDL_libretro_event_sem);
 }
 
 void DUMMY_InitOSKeymap(_THIS)

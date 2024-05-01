@@ -2,35 +2,21 @@
 #include <retro_miscellaneous.h>
 #include <file/file_path.h>
 #include <onscripter/ONScripter.h>
-extern "C" {
-#include <llco.h>
-}
 
-retro_audio_sample_batch_t SDL_libretro_audio_batch_cb;
-retro_input_state_t SDL_libretro_input_state_cb;
-SDL_AudioSpec *SDL_libretro_audio_spec = NULL;
+retro_input_state_t  SDL_libretro_input_state_cb;
+SDL_AudioSpec       *SDL_libretro_audio_spec = NULL;
+SDL_sem             *SDL_libretro_event_sem  = NULL;
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...);
 static retro_video_refresh_t video_cb;
 static retro_input_poll_t input_poll_cb;
+static retro_audio_sample_batch_t audio_batch_cb;
 
 static retro_log_printf_t log_cb = fallback_log;
 static retro_environment_t environ_cb;
 static ONScripter ons;
-static struct llco *retro_co;
-static struct llco *ons_co;
+static SDL_Thread *ons_thread;
 
-
-void SDL_libretro_co_yield(void)
-{
-  llco_switch(retro_co, false);
-}
-
-void SDL_libretro_video_refresh()
-{
-  static SDL_Surface *screen = SDL_GetVideoSurface();
-  video_cb(screen->pixels, screen->w, screen->h, screen->pitch);
-}
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
@@ -65,7 +51,7 @@ void retro_set_audio_sample(retro_audio_sample_t cb)
 
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 {
-  SDL_libretro_audio_batch_cb = cb;
+  audio_batch_cb = cb;
 }
 
 void retro_set_input_poll(retro_input_poll_t cb)
@@ -99,38 +85,22 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
   info->timing.sample_rate = 44100.0;
 }
 
-static void ons_main(void *udata)
-{
-  ons_co = llco_current();
-  llco_switch(retro_co, false);
-  if (ons.init()) {
-    log_cb(RETRO_LOG_ERROR, "Failed to initialize ONScripter\n");
-    return;
-  }
-  SDL_ShowCursor(SDL_DISABLE);
-  ons.executeLabel();
-  llco_switch(retro_co, true);
-}
-
-static void ons_cleanup(void *stack, size_t stack_size, void *udata)
-{
-  free(stack);
-}
-
 void retro_init(void)
 {
-  const size_t ons_stacksz = 65536*8;
   enum retro_pixel_format pixfmt = RETRO_PIXEL_FORMAT_XRGB8888;
   environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixfmt);
-  retro_co = llco_current();
+}
 
-  struct llco_desc desc = {
-    .stack = malloc(ons_stacksz),
-    .stack_size = ons_stacksz,
-    .entry = ons_main,
-    .cleanup = ons_cleanup,
-  };
-  llco_start(&desc, false);
+static int ons_main(void *data)
+{
+  if (ons.init()) {
+    log_cb(RETRO_LOG_ERROR, "Failed to initialize ONScripter\n");
+    return -1;
+  }
+
+  SDL_ShowCursor(SDL_DISABLE);
+  ons.executeLabel();
+  return 0;
 }
 
 bool retro_load_game(const struct retro_game_info *game)
@@ -142,9 +112,13 @@ bool retro_load_game(const struct retro_game_info *game)
   fill_pathname_basedir(archive_path, game->path, sizeof(archive_path));
   ons.setArchivePath(archive_path);
 
+  SDL_libretro_event_sem = SDL_CreateSemaphore(0);
+
   if (ons.openScript() != 0) {
     return false;
   }
+  ons_thread = SDL_CreateThread(ons_main, NULL);
+
   return true;
 }
 
@@ -163,6 +137,7 @@ void retro_reset(void)
 
 void retro_run(void)
 {
+  SDL_Surface *screen = SDL_GetVideoSurface();
   SDL_AudioSpec *spec = SDL_libretro_audio_spec;
   static const size_t max_frames = 2048;
   static int16_t stream[max_frames * 2];
@@ -172,15 +147,17 @@ void retro_run(void)
   frames = frames / 32 * 32;
   ticked = now;
 
-  llco_switch(ons_co, false);
   input_poll_cb();
-  SDL_libretro_video_refresh();
+  SDL_libretro_PumpEvents();
+  video_cb(screen->pixels, screen->w, screen->h, screen->pitch);
 
   // XXX: convert audio format?
   if (spec && SDL_GetAudioStatus() == SDL_AUDIO_PLAYING && frames <= max_frames) {
+    SDL_LockAudio();
     memset(stream, 0, frames * 4);
     spec->callback(NULL, (uint8_t *)stream, frames * 4);
-    SDL_libretro_audio_batch_cb(stream, frames);
+    audio_batch_cb(stream, frames);
+    SDL_UnlockAudio();
   }
 }
 
@@ -209,6 +186,8 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 
 void retro_unload_game(void)
 {
+  SDL_KillThread(ons_thread);
+  SDL_DestroySemaphore(SDL_libretro_event_sem);
   SDL_Quit();
 }
 

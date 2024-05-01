@@ -81,7 +81,7 @@ TTF_Font* TTF_OpenFontIndexDPIRW(SDL_RWops *src, int freesrc, int ptsize, long i
     stbtt_GetFontVMetrics(&font->info, &font->ascent, &font->descent, NULL);
     font->src = src;
     font->freesrc = freesrc;
-    font->height = STBTT_ifloor(ptsize * 96.0 / 72.0);
+    font->height = STBTT_iceil(ptsize) + 2;
     font->scale = stbtt_ScaleForPixelHeight(&font->info, font->height);
     font->ascent = STBTT_iceil(font->ascent * font->scale);
     font->descent = STBTT_iceil(font->descent * font->scale);

@@ -163,18 +163,23 @@ void retro_reset(void)
 
 void retro_run(void)
 {
+  SDL_AudioSpec *spec = SDL_libretro_audio_spec;
+  static const size_t max_frames = 2048;
+  static int16_t stream[max_frames * 2];
+  static uint32_t ticked = SDL_GetTicks();
+  uint32_t now = SDL_GetTicks();
+  size_t frames = (now - ticked) * 44100 / 1000;
+  frames = frames / 32 * 32;
+  ticked = now;
+
   llco_switch(ons_co, false);
   input_poll_cb();
   SDL_libretro_video_refresh();
 
   // XXX: convert audio format?
-  SDL_AudioSpec *spec = SDL_libretro_audio_spec;
-  static const size_t frames = 1024;
-  static const size_t len = frames * 4;
-  static int16_t stream[frames * 2];
-  if (spec && SDL_GetAudioStatus() == SDL_AUDIO_PLAYING) {
-    memset(stream, 0, len);
-    spec->callback(NULL, (uint8_t *)stream, len);
+  if (spec && SDL_GetAudioStatus() == SDL_AUDIO_PLAYING && frames <= max_frames) {
+    memset(stream, 0, frames * 4);
+    spec->callback(NULL, (uint8_t *)stream, frames * 4);
     SDL_libretro_audio_batch_cb(stream, frames);
   }
 }

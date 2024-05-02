@@ -152,7 +152,7 @@ void retro_run(void)
   static const size_t max_frames = 2048;
   static int16_t stream[max_frames * 2];
   size_t frames = delta * 44100 / 1000;
-  frames = frames / 32 * 32;
+  frames = (frames / 32 + 1) * 32;
 
   input_poll_cb();
   SDL_libretro_PumpEvents();

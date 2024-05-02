@@ -7,15 +7,15 @@ retro_input_state_t  SDL_libretro_input_state_cb;
 SDL_AudioSpec       *SDL_libretro_audio_spec = NULL;
 SDL_sem             *SDL_libretro_event_sem  = NULL;
 
-static void fallback_log(enum retro_log_level level, const char *fmt, ...);
-static retro_video_refresh_t video_cb;
-static retro_input_poll_t input_poll_cb;
-static retro_audio_sample_batch_t audio_batch_cb;
-
-static retro_log_printf_t log_cb = fallback_log;
-static retro_environment_t environ_cb;
-static ONScripter ons;
-static SDL_Thread *ons_thread;
+static void                        fallback_log(enum retro_log_level level, const char *fmt, ...);
+static retro_log_printf_t          log_cb = fallback_log;
+static retro_video_refresh_t       video_cb;
+static retro_input_poll_t          input_poll_cb;
+static retro_audio_sample_batch_t  audio_batch_cb;
+static retro_environment_t         environ_cb;
+static ONScripter                  ons;
+static SDL_Thread                 *ons_thread;
+static uint32_t                    delta;
 
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
@@ -85,10 +85,20 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
   info->timing.sample_rate = 44100.0;
 }
 
+static void frame_cb(retro_usec_t usec)
+{
+  delta = usec / 1000;
+}
+
 void retro_init(void)
 {
   enum retro_pixel_format pixfmt = RETRO_PIXEL_FORMAT_XRGB8888;
+  struct retro_frame_time_callback frametime = {
+    .callback = frame_cb,
+    .reference = 1000000 / 60,
+  };
   environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixfmt);
+  environ_cb(RETRO_ENVIRONMENT_SET_FRAME_TIME_CALLBACK, &frametime);
 }
 
 static int ons_main(void *data)
@@ -141,11 +151,8 @@ void retro_run(void)
   SDL_AudioSpec *spec = SDL_libretro_audio_spec;
   static const size_t max_frames = 2048;
   static int16_t stream[max_frames * 2];
-  static uint32_t ticked = SDL_GetTicks();
-  uint32_t now = SDL_GetTicks();
-  size_t frames = (now - ticked) * 44100 / 1000;
+  size_t frames = delta * 44100 / 1000;
   frames = frames / 32 * 32;
-  ticked = now;
 
   input_poll_cb();
   SDL_libretro_PumpEvents();

@@ -81,15 +81,7 @@ SOURCES_C += $(addprefix $(DEPS_DIR)/sdl/src/,\
 )
 SOURCES_C += $(addprefix $(SDL_LIBRETRO_DIR)/, \
   audio.c events.c video.c \
-  SDL_ttf.c IMG_stb.c \
-)
-
-# sdl-image
-CFLAGS += -DSIZEOF_SIZE_T=__SIZEOF_SIZE_T__ -DLOAD_JPG -DLOAD_BMP -DLOAD_PNG
-SOURCES_C += $(addprefix $(DEPS_DIR)/sdl-image/, \
-  IMG.c IMG_bmp.c IMG_gif.c IMG_lbm.c IMG_pcx.c \
-  IMG_pnm.c IMG_tga.c IMG_tif.c IMG_webp.c \
-  IMG_xcf.c IMG_xpm.c IMG_xv.c \
+  SDL_ttf.c SDL_image.c \
 )
 
 # sdl-mixer

@@ -102,20 +102,7 @@ set(SOURCES
   sdl-libretro/events.c
   sdl-libretro/video.c
   sdl-libretro/SDL_ttf.c
-  sdl-libretro/IMG_stb.c
-  deps/sdl-image/IMG_bmp.c
-  deps/sdl-image/IMG.c
-  deps/sdl-image/IMG_gif.c
-  deps/sdl-image/IMG_lbm.c
-  deps/sdl-image/IMG_pcx.c
-  deps/sdl-image/IMG_pnm.c
-  deps/sdl-image/IMG_tga.c
-  deps/sdl-image/IMG_tif.c
-  deps/sdl-image/IMG_webp.c
-  deps/sdl-image/IMG_xcf.c
-  deps/sdl-image/IMG_xpm.c
-  deps/sdl-image/IMG_xv.c
-  deps/sdl-image/IMG_xxx.c
+  sdl-libretro/SDL_image.cpp
   deps/sdl-mixer/mixer.c
   deps/sdl-mixer/music.c
   deps/sdl-mixer/effects_internal.c

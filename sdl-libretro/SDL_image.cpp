@@ -104,7 +104,7 @@ static SDL_Surface *IMG_LoadANY_RW(SDL_RWops *src)
   DecodeImageCallbacks callbacks;
   wuffs_aux::DecodeImageResult res = wuffs_aux::DecodeImage(callbacks, input);
   if (!res.error_message.empty()) {
-    IMG_SetError("wuffs_aux::DecodeImage: %s", res.error_message);
+    IMG_SetError("wuffs_aux::DecodeImage: %s", res.error_message.c_str());
     return NULL;
   }
   return callbacks.TakeSurface();

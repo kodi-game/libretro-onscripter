@@ -70,6 +70,14 @@ static void PumpMouseEvents(void)
   int16_t _y = SDL_libretro_input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
   int16_t _pressed = 0;
 
+  _x = screen->w * (_x + 0x7fff) / 0xffff;
+  _y = screen->h * (_y + 0x7fff) / 0xffff;
+  if (x != _x || y != _y) {
+    x = _x;
+    y = _y;
+    SDL_PrivateMouseMotion(0, 0, x, y);
+  }
+
   while (SDL_libretro_input_state_cb(0, RETRO_DEVICE_POINTER, _pressed, RETRO_DEVICE_ID_POINTER_PRESSED)) {
     _pressed += 1;
   }
@@ -89,11 +97,8 @@ static void PumpMouseEvents(void)
     }
   } else {
     if (_pressed) {
-      x = screen->w * (_x + 0x7fff) / 0xffff;
-      y = screen->h * (_y + 0x7fff) / 0xffff;
       btn = to_button(_pressed);
-      SDL_WarpMouse(x, y);
-      SDL_PrivateMouseButton(SDL_PRESSED, btn, 0, 0);
+      SDL_PrivateMouseButton(SDL_PRESSED, btn, x, y);
       pressed = _pressed;
     }
   }

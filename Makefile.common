@@ -6,10 +6,6 @@ SDL_LIBRETRO_DIR = $(CORE_DIR)/sdl-libretro
 INCFLAGS := \
   -I$(LIBRETRO_COMM_DIR)/include \
   -I$(DEPS_DIR)/bzip2 \
-  -I$(DEPS_DIR)/zlib \
-  -I$(DEPS_DIR)/freetype/include \
-  -I$(DEPS_DIR)/libjpeg-turbo \
-  -I$(DEPS_DIR)/libpng \
   -I$(DEPS_DIR)/libogg/include \
   -I$(DEPS_DIR)/libvorbis/include \
   -I$(DEPS_DIR)/libmad/ \
@@ -17,7 +13,6 @@ INCFLAGS := \
   -I$(DEPS_DIR)/sdl/include \
   -I$(DEPS_DIR)/sdl-image \
   -I$(DEPS_DIR)/sdl-mixer \
-  -I$(DEPS_DIR)/sdl-ttf \
   -I$(CORE_DIR) \
   -I$(DEPS_DIR)
 
@@ -35,51 +30,6 @@ SOURCES_C += \
   $(DEPS_DIR)/bzip2/compress.c \
   $(DEPS_DIR)/bzip2/decompress.c \
   $(DEPS_DIR)/bzip2/bzlib.c
-
-# freetype
-CFLAGS += -DFT2_BUILD_LIBRARY=1
-SOURCES_C += $(addprefix $(DEPS_DIR)/freetype/src/,\
-  base/ftbase.c \
-  base/ftdebug.c \
-  base/ftinit.c \
-  base/ftsystem.c \
-  base/ftbitmap.c \
-  base/ftglyph.c \
-  base/ftstroke.c \
-  autofit/autofit.c \
-  psnames/psnames.c \
-  sfnt/sfnt.c \
-  truetype/truetype.c \
-  raster/raster.c \
-  smooth/smooth.c \
-)
-
-# libjpeg-turbo
-SOURCES_C += $(addprefix $(DEPS_DIR)/libjpeg-turbo/,\
-  jcapimin.c jcapistd.c jccoefct.c jccolor.c jcdctmgr.c jchuff.c \
-  jcicc.c jcinit.c jcmainct.c jcmarker.c jcmaster.c jcomapi.c jcparam.c \
-  jcphuff.c jcprepct.c jcsample.c jctrans.c jdapimin.c jdapistd.c jdatadst.c \
-  jdatasrc.c jdcoefct.c jdcolor.c jddctmgr.c jdhuff.c jdicc.c jdinput.c \
-  jdmainct.c jdmarker.c jdmaster.c jdmerge.c jdphuff.c jdpostct.c jdsample.c \
-  jdtrans.c jerror.c jfdctflt.c jfdctfst.c jfdctint.c jidctflt.c jidctfst.c \
-  jidctint.c jidctred.c jquant1.c jquant2.c jutils.c jmemmgr.c jmemnobs.c \
-  jaricom.c jcarith.c jdarith.c \
-  jsimd_none.c \
-)
-
-# zlib
-SOURCES_C += $(addprefix $(DEPS_DIR)/zlib/,\
-  adler32.c compress.c crc32.c deflate.c gzclose.c gzlib.c \
-  gzread.c gzwrite.c inflate.c infback.c inftrees.c inffast.c \
-  trees.c uncompr.c zutil.c \
-)
-
-# libpng
-SOURCES_C += $(addprefix $(DEPS_DIR)/libpng/,\
-  png.c pngerror.c pngget.c pngmem.c pngpread.c \
-  pngread.c pngrio.c pngrtran.c pngrutil.c \
-  pngset.c pngtrans.c pngwio.c pngwrite.c pngwtran.c pngwutil.c \
-)
 
 # libogg
 SOURCES_C += $(addprefix $(DEPS_DIR)/libogg/src/,\
@@ -131,11 +81,8 @@ SOURCES_C += $(addprefix $(DEPS_DIR)/sdl/src/,\
 )
 SOURCES_C += $(addprefix $(SDL_LIBRETRO_DIR)/, \
   audio.c events.c video.c \
+  SDL_ttf.c SDL_image.c \
 )
-
-# sdl-image
-CFLAGS += -DSIZEOF_SIZE_T=__SIZEOF_SIZE_T__ -DLOAD_JPG -DLOAD_BMP -DLOAD_PNG
-SOURCES_C += $(filter-out %/showimage.c, $(wildcard $(DEPS_DIR)/sdl-image/*.c))
 
 # sdl-mixer
 CFLAGS += -DOGG_MUSIC -DMP3_MAD_MUSIC
@@ -152,9 +99,6 @@ SOURCES_C += $(addprefix $(DEPS_DIR)/sdl-mixer/,\
   music_mad.c \
 )
 
-# sdl-ttf
-SOURCES_C += $(DEPS_DIR)/sdl-ttf/SDL_ttf.c
-
 # libretro-common
 SOURCES_C += $(addprefix $(LIBRETRO_COMM_DIR)/,\
   compat/compat_strl.c \
@@ -162,7 +106,6 @@ SOURCES_C += $(addprefix $(LIBRETRO_COMM_DIR)/,\
   string/stdstring.c \
   time/rtime.c \
   file/file_path.c \
-  libco/libco.c \
 )
 
 # onscripter

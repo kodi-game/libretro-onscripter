@@ -7,10 +7,10 @@
 extern "C" {
 #endif
 
-void SDL_libretro_co_yield(void);
-
-extern retro_audio_sample_batch_t SDL_libretro_audio_batch_cb;
-extern retro_input_state_t SDL_libretro_input_state_cb;
+extern SDL_AudioSpec       *SDL_libretro_audio_spec;
+extern retro_input_state_t  SDL_libretro_input_state_cb;
+extern SDL_sem             *SDL_libretro_event_sem;
+void                        SDL_libretro_PumpEvents(void);
 
 #ifdef __cplusplus
 }

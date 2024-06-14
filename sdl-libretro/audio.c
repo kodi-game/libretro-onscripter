@@ -66,41 +66,26 @@ AudioBootStrap DUMMYAUD_bootstrap = {
 
 static void DUMMYAUD_WaitAudio(_THIS)
 {
-  SDL_Delay(10);
 }
 
 static void DUMMYAUD_PlayAudio(_THIS)
 {
-  SDL_AudioSpec *spec = &this->spec;
-  Sint16 *ptr=(Sint16*)this->hidden->mixbuf;
-  SDL_libretro_audio_batch_cb(ptr, spec->samples);
 }
 
 static Uint8 *DUMMYAUD_GetAudioBuf(_THIS)
 {
-  return(this->hidden->mixbuf);
+  return NULL;
 }
 
 static void DUMMYAUD_CloseAudio(_THIS)
 {
-  if (this->hidden->mixbuf != NULL) {
-    SDL_FreeAudioMem(this->hidden->mixbuf);
-    this->hidden->mixbuf = NULL;
-  }
 }
 
 
 static int DUMMYAUD_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
-  spec->samples = 512;
-  SDL_CalculateAudioSpec(spec);
-  this->hidden->mixlen = spec->size;
-  this->hidden->mixbuf = (Uint8 *)SDL_AllocAudioMem(this->hidden->mixlen);
-  if (this->hidden->mixbuf == NULL) {
-    return -1;
-  }
-  SDL_memset(this->hidden->mixbuf, spec->silence, spec->size);
+  SDL_libretro_audio_spec = spec;
 
-  /* We're ready to rock and roll. :-) */
-  return 0;
+  /* Don't spawn thread for SDL_RunAudio */
+  return 1;
 }

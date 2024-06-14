@@ -2,6 +2,7 @@
 #include <sdl/src/events/SDL_events_c.h>
 #include <sdl/src/video/dummy/SDL_nullevents_c.h>
 
+static SDL_sem *sem = NULL;
 
 static void PumpKeyboardEvents(void)
 {
@@ -19,22 +20,22 @@ static void PumpKeyboardEvents(void)
 
   static int16_t buttons[16] = {0};
   static const int bkeys[16] = {
-    [RETRO_DEVICE_ID_JOYPAD_B] = SDLK_SPACE,
-    [RETRO_DEVICE_ID_JOYPAD_Y] = SDLK_RCTRL,
+    [RETRO_DEVICE_ID_JOYPAD_B]      = SDLK_SPACE,
+    [RETRO_DEVICE_ID_JOYPAD_Y]      = SDLK_RCTRL,
     [RETRO_DEVICE_ID_JOYPAD_SELECT] = SDLK_0,
-    [RETRO_DEVICE_ID_JOYPAD_START] = SDLK_a,
-    [RETRO_DEVICE_ID_JOYPAD_UP] = SDLK_UP,
-    [RETRO_DEVICE_ID_JOYPAD_DOWN] = SDLK_DOWN,
-    [RETRO_DEVICE_ID_JOYPAD_LEFT] = SDLK_LEFT,
-    [RETRO_DEVICE_ID_JOYPAD_RIGHT] = SDLK_RIGHT,
-    [RETRO_DEVICE_ID_JOYPAD_A] = SDLK_RETURN,
-    [RETRO_DEVICE_ID_JOYPAD_X] = SDLK_ESCAPE,
-    [RETRO_DEVICE_ID_JOYPAD_L] = SDLK_o,
-    [RETRO_DEVICE_ID_JOYPAD_R] = SDLK_s,
-    [RETRO_DEVICE_ID_JOYPAD_L2] = SDLK_SPACE,
-    [RETRO_DEVICE_ID_JOYPAD_R2] = SDLK_RETURN,
-    [RETRO_DEVICE_ID_JOYPAD_L2] = 0,
-    [RETRO_DEVICE_ID_JOYPAD_R3] = 0,
+    [RETRO_DEVICE_ID_JOYPAD_START]  = SDLK_a,
+    [RETRO_DEVICE_ID_JOYPAD_UP]     = SDLK_UP,
+    [RETRO_DEVICE_ID_JOYPAD_DOWN]   = SDLK_DOWN,
+    [RETRO_DEVICE_ID_JOYPAD_LEFT]   = SDLK_LEFT,
+    [RETRO_DEVICE_ID_JOYPAD_RIGHT]  = SDLK_RIGHT,
+    [RETRO_DEVICE_ID_JOYPAD_A]      = SDLK_RETURN,
+    [RETRO_DEVICE_ID_JOYPAD_X]      = SDLK_ESCAPE,
+    [RETRO_DEVICE_ID_JOYPAD_L]      = SDLK_o,
+    [RETRO_DEVICE_ID_JOYPAD_R]      = SDLK_s,
+    [RETRO_DEVICE_ID_JOYPAD_L2]     = SDLK_PAGEUP,
+    [RETRO_DEVICE_ID_JOYPAD_R2]     = SDLK_PAGEDOWN,
+    [RETRO_DEVICE_ID_JOYPAD_L3]     = SDLK_TAB,
+    [RETRO_DEVICE_ID_JOYPAD_R3]     = SDLK_q,
   };
   for (int i = 0; i < 16; ++i) {
     int16_t state = SDL_libretro_input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i);
@@ -69,6 +70,14 @@ static void PumpMouseEvents(void)
   int16_t _y = SDL_libretro_input_state_cb(0, RETRO_DEVICE_POINTER, 0, RETRO_DEVICE_ID_POINTER_Y);
   int16_t _pressed = 0;
 
+  _x = screen->w * (_x + 0x7fff) / 0xffff;
+  _y = screen->h * (_y + 0x7fff) / 0xffff;
+  if (x != _x || y != _y) {
+    x = _x;
+    y = _y;
+    SDL_PrivateMouseMotion(0, 0, x, y);
+  }
+
   while (SDL_libretro_input_state_cb(0, RETRO_DEVICE_POINTER, _pressed, RETRO_DEVICE_ID_POINTER_PRESSED)) {
     _pressed += 1;
   }
@@ -88,11 +97,8 @@ static void PumpMouseEvents(void)
     }
   } else {
     if (_pressed) {
-      x = screen->w * (_x + 0x7fff) / 0xffff;
-      y = screen->h * (_y + 0x7fff) / 0xffff;
       btn = to_button(_pressed);
-      SDL_WarpMouse(x, y);
-      SDL_PrivateMouseButton(SDL_PRESSED, btn, 0, 0);
+      SDL_PrivateMouseButton(SDL_PRESSED, btn, x, y);
       pressed = _pressed;
     }
   }
@@ -100,9 +106,14 @@ static void PumpMouseEvents(void)
 
 void DUMMY_PumpEvents(_THIS)
 {
+  SDL_SemWait(SDL_libretro_event_sem);
+}
+
+void SDL_libretro_PumpEvents(void)
+{
   PumpKeyboardEvents();
   PumpMouseEvents();
-  SDL_libretro_co_yield();
+  SDL_SemPost(SDL_libretro_event_sem);
 }
 
 void DUMMY_InitOSKeymap(_THIS)

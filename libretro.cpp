@@ -1,32 +1,22 @@
 #include <SDL_libretro.h>
 #include <retro_miscellaneous.h>
 #include <file/file_path.h>
-#include <libco.h>
 #include <onscripter/ONScripter.h>
 
-retro_audio_sample_batch_t SDL_libretro_audio_batch_cb;
-retro_input_state_t SDL_libretro_input_state_cb;
+retro_input_state_t  SDL_libretro_input_state_cb;
+SDL_AudioSpec       *SDL_libretro_audio_spec = NULL;
+SDL_sem             *SDL_libretro_event_sem  = NULL;
 
-static void fallback_log(enum retro_log_level level, const char *fmt, ...);
-static retro_video_refresh_t video_cb;
-static retro_input_poll_t input_poll_cb;
+static void                        fallback_log(enum retro_log_level level, const char *fmt, ...);
+static retro_log_printf_t          log_cb = fallback_log;
+static retro_video_refresh_t       video_cb;
+static retro_input_poll_t          input_poll_cb;
+static retro_audio_sample_batch_t  audio_batch_cb;
+static retro_environment_t         environ_cb;
+static ONScripter                  ons;
+static SDL_Thread                 *ons_thread;
+static uint32_t                    delta;
 
-static retro_log_printf_t log_cb = fallback_log;
-static retro_environment_t environ_cb;
-static ONScripter ons;
-static cothread_t retro_ct, ons_ct;
-
-
-void SDL_libretro_co_yield(void)
-{
-  co_switch(retro_ct);
-}
-
-void SDL_libretro_video_refresh()
-{
-  static SDL_Surface *screen = SDL_GetVideoSurface();
-  video_cb(screen->pixels, screen->w, screen->h, screen->pitch);
-}
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
@@ -61,7 +51,7 @@ void retro_set_audio_sample(retro_audio_sample_t cb)
 
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 {
-  SDL_libretro_audio_batch_cb = cb;
+  audio_batch_cb = cb;
 }
 
 void retro_set_input_poll(retro_input_poll_t cb)
@@ -78,7 +68,7 @@ void retro_get_system_info(struct retro_system_info *info)
 {
   info->need_fullpath = true;
   info->valid_extensions = "txt|dat|___|ons";
-  info->library_version = "0.1";
+  info->library_version = "0.2";
   info->library_name = "onscripter";
   info->block_extract = false;
 }
@@ -91,26 +81,37 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
   info->geometry.base_height = height;
   info->geometry.max_width = width;
   info->geometry.max_height = height;
+  info->geometry.aspect_ratio = 0.0;
   info->timing.fps = 60.0;
   info->timing.sample_rate = 44100.0;
 }
 
-static void ons_main(void)
+static void frame_cb(retro_usec_t usec)
 {
-  if (ons.init()) {
-    log_cb(RETRO_LOG_ERROR, "Failed to initialize ONScripter\n");
-    return;
-  }
-  SDL_ShowCursor(SDL_DISABLE);
-  ons.executeLabel();
+  delta = usec / 1000;
 }
 
 void retro_init(void)
 {
   enum retro_pixel_format pixfmt = RETRO_PIXEL_FORMAT_XRGB8888;
+  struct retro_frame_time_callback frametime = {
+    .callback = frame_cb,
+    .reference = 1000000 / 60,
+  };
   environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &pixfmt);
-  retro_ct = co_active();
-  ons_ct = co_create(65536*8, ons_main);
+  environ_cb(RETRO_ENVIRONMENT_SET_FRAME_TIME_CALLBACK, &frametime);
+}
+
+static int ons_main(void *data)
+{
+  if (ons.init()) {
+    log_cb(RETRO_LOG_ERROR, "Failed to initialize ONScripter\n");
+    return -1;
+  }
+
+  SDL_ShowCursor(SDL_DISABLE);
+  ons.executeLabel();
+  return 0;
 }
 
 bool retro_load_game(const struct retro_game_info *game)
@@ -122,9 +123,13 @@ bool retro_load_game(const struct retro_game_info *game)
   fill_pathname_basedir(archive_path, game->path, sizeof(archive_path));
   ons.setArchivePath(archive_path);
 
+  SDL_libretro_event_sem = SDL_CreateSemaphore(0);
+
   if (ons.openScript() != 0) {
     return false;
   }
+  ons_thread = SDL_CreateThread(ons_main, NULL);
+
   return true;
 }
 
@@ -143,9 +148,25 @@ void retro_reset(void)
 
 void retro_run(void)
 {
-  co_switch(ons_ct);
+  SDL_Surface *screen = SDL_GetVideoSurface();
+  SDL_AudioSpec *spec = SDL_libretro_audio_spec;
+  static const size_t max_frames = 2048;
+  static int16_t stream[max_frames * 2];
+  size_t frames = delta * 44100 / 1000;
+  frames = (frames / 32 + 1) * 32;
+
   input_poll_cb();
-  SDL_libretro_video_refresh();
+  SDL_libretro_PumpEvents();
+  video_cb(screen->pixels, screen->w, screen->h, screen->pitch);
+
+  // XXX: convert audio format?
+  if (spec && SDL_GetAudioStatus() == SDL_AUDIO_PLAYING && frames <= max_frames) {
+    SDL_LockAudio();
+    memset(stream, 0, frames * 4);
+    spec->callback(NULL, (uint8_t *)stream, frames * 4);
+    audio_batch_cb(stream, frames);
+    SDL_UnlockAudio();
+  }
 }
 
 size_t retro_serialize_size(void)
@@ -173,6 +194,8 @@ bool retro_load_game_special(unsigned game_type, const struct retro_game_info *i
 
 void retro_unload_game(void)
 {
+  SDL_KillThread(ons_thread);
+  SDL_DestroySemaphore(SDL_libretro_event_sem);
   SDL_Quit();
 }
 

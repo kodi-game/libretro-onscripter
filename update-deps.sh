@@ -7,7 +7,7 @@ git submodule update --init
 
 # Get deps tarball from github release.
 if [ ! -f deps.tar.xz ]; then
-    wget -O deps.tar.xz https://github.com/iyzsong/onscripter-libretro/releases/download/v0.1/libretro-onscripter-deps-20230212.tar.xz
+    wget -O deps.tar.xz https://github.com/iyzsong/onscripter-libretro/releases/download/v0.2/libretro-onscripter-deps-20240118.tar.xz
 fi
 
 # cp -rv "$(guix build -f deps.scm || kill $$)"/* ./deps/

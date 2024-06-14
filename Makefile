@@ -121,6 +121,15 @@ else ifeq ($(platform), sf2000)
    CFLAGS += -DSF2000
    CXXFLAGS = $(CFLAGS)
    STATIC_LINKING = 1
+else ifeq ($(platform), miyoomini)
+   TARGET := $(TARGET_NAME)_libretro.so
+   fpic := -fPIC
+   SHARED := -shared -Wl,--version-script=$(CORE_DIR)/link.T -Wl,--no-undefined
+   CC = arm-linux-gnueabihf-gcc
+   CXX = arm-linux-gnueabihf-g++
+   AR = arm-linux-gnueabihf-ar
+   CFLAGS += -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard -march=armv7ve
+   CXXFLAGS += $(CFLAGS)
 else
    CC = gcc
    TARGET := $(TARGET_NAME)_libretro.dll
@@ -133,7 +142,7 @@ ifeq ($(DEBUG), 1)
    CFLAGS += -O0 -g -DDEBUG
    CXXFLAGS += -O0 -g -DDEBUG
 else
-   CFLAGS += -O3 
+   CFLAGS += -O3
    CXXFLAGS += -O3
 endif
 
